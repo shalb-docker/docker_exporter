@@ -9,6 +9,7 @@ import logging
 import yaml
 import prometheus_client
 import prometheus_client.core
+import datetime
 
 # pip3 install prometheus_client docker pyaml
 
@@ -27,8 +28,7 @@ def get_config(args):
     for key in vars(args):
         conf[key] = vars(args)[key]
     with open(conf['config']) as conf_file:
-        conf_yaml = yaml.load(conf_file)
-       #conf_yaml = yaml.load(conf_file, Loader=yaml.FullLoader)
+        conf_yaml = yaml.load(conf_file, Loader=yaml.FullLoader)
     for key in conf_yaml:
         if not conf.get(key):
             conf[key] = conf_yaml[key]
@@ -84,16 +84,27 @@ def parse_data_containers_info(containers):
         name = cont['Labels'].get('com.docker.compose.service')
         log.debug('Parsing container: {0} {1}'.format(name, c_id))
         labels = {'container_name': name, 'id': c_id}
+        # get state
         metric_name = '{0}_exporter_container_state'.format(conf['name'])
         description = 'Conainer state: {0}'.format(states_map)
         metric = {'metric_name': metric_name, 'labels': labels, 'description': description, 'value': states_map[state]}
         data_append(metric)
-        stats_gen = docker_client.api.stats(c_id, decode=True, stream=True)
+        # get other stats
         if state != 'running':
             continue
+        stats_gen = docker_client.api.stats(c_id, decode=True, stream=True)
         for stats in stats_gen:
             break
-       #stats = docker_client.api.stats(c_id, decode=True, stream=False)
+        # get uptime
+        inspect = docker_client.api.inspect_container(c_id)
+        metric_name = '{0}_exporter_container_uptime_seconds'.format(conf['name'])
+        description = 'Conainer uptime in seconds'
+        current_time = datetime.datetime.strptime(stats['read'].split('.')[0], '%Y-%m-%dT%H:%M:%S')
+        start_time = datetime.datetime.strptime(inspect['State']['StartedAt'].split('.')[0], '%Y-%m-%dT%H:%M:%S')
+        value = (current_time - start_time).seconds
+        metric = {'metric_name': metric_name, 'labels': labels, 'description': description, 'value': value}
+        data_append(metric)
+        # get stats
         parse_data_containers_io(labels, stats)
         parse_data_containers_cpu(labels, stats)
         parse_data_containers_memory(labels, stats)
@@ -119,7 +130,7 @@ def parse_data_containers_io(labels, stats):
 
 def parse_data_containers_cpu(labels, stats):
         # get CPU stats
-        metric_name = '{0}_exporter_container_cpu_usage_total_seconds'.format(conf['name'])
+        metric_name = '{0}_exporter_container_cpu_usage_total'.format(conf['name'])
         description = 'Conainer total cpu_usage: stats.cpu_stats.cpu_usage.total_usage'
         value = stats['cpu_stats']['cpu_usage']['total_usage']
         metric = {'metric_name': metric_name, 'labels': labels, 'description': description, 'value': value}

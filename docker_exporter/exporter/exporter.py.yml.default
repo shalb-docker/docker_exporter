@@ -3,5 +3,5 @@ tasks:
   - 'containers'
 log_level: 'INFO'
 check_interval: 10
-listen_port: 8088
+listen_port: 9610
 name: 'docker'
