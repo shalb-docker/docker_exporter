@@ -7,6 +7,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
     ports:
-      - "0.0.0.0:9610:9610"
-#     - "127.0.0.1:9610:9610"
+      - "0.0.0.0:9647:9647"
+#     - "127.0.0.1:9647:9647"
 
