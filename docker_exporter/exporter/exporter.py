@@ -82,6 +82,9 @@ def parse_data_containers_info(containers):
         c_id = cont['Id']
         state = cont['State'].lower()
         name = cont['Labels'].get('com.docker.compose.service')
+        if not name:
+            log.debug('No name, see labels: {0}'.format(cont['Labels']))
+            continue
         log.debug('Parsing container: {0} {1}'.format(name, c_id))
         labels = {'container_name': name, 'id': c_id}
         # get state
@@ -111,7 +114,7 @@ def parse_data_containers_info(containers):
         parse_data_containers_network(labels, stats)
 
 def parse_data_containers_io(labels, stats):
-    # get I/O stats
+    '''Get I/O stats'''
     for m1 in ['io_serviced_recursive', 'io_service_bytes_recursive']:
         if not stats['blkio_stats'][m1]:
             continue
@@ -129,7 +132,7 @@ def parse_data_containers_io(labels, stats):
                 data_append(metric)
 
 def parse_data_containers_cpu(labels, stats):
-        # get CPU stats
+        '''Get CPU stats'''
         metric_name = '{0}_exporter_container_cpu_usage_total'.format(conf['name'])
         description = 'Conainer total cpu_usage: stats.cpu_stats.cpu_usage.total_usage'
         value = stats['cpu_stats']['cpu_usage']['total_usage']
@@ -137,7 +140,7 @@ def parse_data_containers_cpu(labels, stats):
         data_append(metric)
 
 def parse_data_containers_memory(labels, stats):
-        # get Memory stats
+        '''Get Memory stats'''
         for m in ['usage', 'limit']:
             metric_name = '{0}_exporter_container_memory_{1}_bytes'.format(conf['name'], m)
             description = 'Conainer memory usage: stats.memory_stats.{0}'.format(m)
@@ -146,7 +149,7 @@ def parse_data_containers_memory(labels, stats):
             data_append(metric)
 
 def parse_data_containers_network(labels, stats):
-        # get Network stats
+        '''Get Network stats'''
         net_devices = list(stats['networks'].keys())
         for dev_name in net_devices:
             dev = stats['networks'][dev_name]
@@ -164,9 +167,11 @@ def parse_data_containers_network(labels, stats):
                 data_append(metric)
 
 def data_append(metric):
+    '''Add metrics to memory'''
     data_tmp.append(metric)
 
 def label_clean(label):
+    '''Replace not allowed characters in label name'''
     replace_map = {
         '\\': '',
         '"': '',
@@ -198,6 +203,7 @@ class Collector(object):
         gauge = prometheus_client.core.GaugeMetricFamily
         counter = prometheus_client.core.CounterMetricFamily
         # get dinamic data
+        #### Warning - data collection always trigered by code, because data collection is slow and heavy right now. ####
        #try:
        #    get_data()
        #    docker_exporter_up.set(1)
