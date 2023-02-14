@@ -1,4 +1,4 @@
-FROM python:3.7.1
+FROM python:3.11-alpine
 
 COPY docker_exporter/exporter /opt/exporter
 RUN ls -la /opt/exporter
