@@ -11,8 +11,6 @@ import prometheus_client
 import prometheus_client.core
 import datetime
 
-# pip3 install prometheus_client docker pyaml
-
 # parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', default=sys.argv[0] + '.yml', help='config file location')
