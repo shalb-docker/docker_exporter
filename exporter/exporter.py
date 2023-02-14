@@ -11,8 +11,6 @@ import prometheus_client
 import prometheus_client.core
 import datetime
 
-# pip3 install prometheus_client docker pyaml
-
 # parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', default=sys.argv[0] + '.yml', help='config file location')
@@ -86,7 +84,10 @@ def parse_data_containers_info(containers):
             log.debug('No name, see labels: {0}'.format(cont['Labels']))
             continue
         log.debug('Parsing container: {0} {1}'.format(name, c_id))
-        labels = {'container_name': name, 'id': c_id}
+        names = cont['Names'][0].lower()
+        project = cont['Labels'].get('com.docker.compose.project')
+        container_number = cont['Labels'].get('com.docker.compose.container-number')
+        labels = {'container_name': name, 'id': c_id, 'names': names, 'container_number': container_number, 'project': project}
         # get state
         metric_name = '{0}_exporter_container_state'.format(conf['name'])
         description = 'Conainer state: {0}'.format(states_map)

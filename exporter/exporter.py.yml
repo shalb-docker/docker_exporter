@@ -2,6 +2,6 @@
 tasks:
   - 'containers'
 log_level: 'INFO'
-check_interval: 10
+check_interval: 30
 listen_port: 9647
 name: 'docker'

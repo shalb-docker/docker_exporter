@@ -1,5 +1,6 @@
 # docker_exporter
-docker exporter for prometheus monitoring
+
+Docker exporter for Prometheus monitoring
 
 ## Info
 
@@ -7,7 +8,7 @@ Use this exporter in case of running conainers by docker-compose (you will have 
 
 ## build
 
-~~~~
+~~~~bash
 docker login
 docker-compose -f docker-compose-build.yml build
 docker-compose -f docker-compose-build.yml push
@@ -15,16 +16,19 @@ docker-compose -f docker-compose-build.yml push
 
 ## configuration
 
-customize your configuration via config file docker_exporter/exporter/exporter.py.yml
+Customize your configuration via config file docker_exporter/exporter/exporter.py.yml
 
 ## run
 
-Use docker-compose.yml to run container with mounted config docker_exporter/exporter/exporter.py.yml
-~~~~
+Use docker-compose.yml to run container.  
+To customize config you can mount your customized exporter.py.yml to /opt/exporter/exporter.py.yml.
+
+~~~~bash
 docker-compose up
 ~~~~
 
 ## dependencies if want to run without container
 
-pip3 install --user pyaml prometheus_client docker
-
+~~~~bash
+pip3 install -r requirements.txt
+~~~~
