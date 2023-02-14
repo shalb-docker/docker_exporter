@@ -3,5 +3,5 @@ services:
   docker_exporter:
     build:
       context: ./
-    image: shalb/docker_exporter:0.0.2
+    image: shalb/docker_exporter:0.0.3
 
